@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Makana Kava — Your coupon</title>
+<!-- Google Ads conversion (Coupon Claimed) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-16605899813"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-16605899813');
+</script>
+<style>
+  :root{ --bg:#1d130c; --card:#2a1c12; --accent:#c98a3c; --accent2:#e7b56a; --text:#f3e9dc; --muted:#b69b80; }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .card{background:var(--card);border:1px solid rgba(231,181,106,.25);border-radius:18px;max-width:380px;width:100%;
+        padding:28px 24px;text-align:center;}
+  .brand{font-size:14px;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);margin-bottom:6px;}
+  h1{font-size:24px;font-weight:600;margin:8px 0 4px;line-height:1.3;}
+  .sub{color:var(--muted);font-size:14px;margin-bottom:22px;}
+  .offer{background:rgba(201,138,60,.12);border:1px dashed var(--accent);border-radius:12px;padding:16px;margin:18px 0;
+         font-size:18px;font-weight:600;color:var(--accent2);}
+  button{background:var(--accent);color:#1d130c;border:none;border-radius:12px;padding:15px 20px;font-size:17px;
+         font-weight:700;width:100%;cursor:pointer;}
+  button:active{transform:scale(.98);}
+  button:disabled{opacity:.6;}
+  #qr{display:flex;justify-content:center;margin:18px auto 10px;padding:14px;background:#fff;border-radius:12px;width:fit-content;}
+  .code{font-size:26px;font-weight:800;letter-spacing:2px;color:var(--accent2);font-family:monospace;}
+  .hint{font-size:13px;color:var(--muted);margin-top:14px;line-height:1.5;}
+  .addr{font-size:12px;color:var(--muted);margin-top:20px;border-top:1px solid rgba(231,181,106,.15);padding-top:14px;}
+  .hidden{display:none;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">Makana Kava</div>
+
+    <!-- State 1: offer -->
+    <div id="claim">
+      <h1>Your first kava is on us 🥥</h1>
+      <p class="sub">Claim your coupon and show it at the bar.</p>
+      <div class="offer">Free kava on your first visit</div>
+      <button id="btn" onclick="claim()">Get my coupon</button>
+      <p class="hint">Valid for first-time visits only. One coupon per person.</p>
+    </div>
+
+    <!-- State 2: coupon generated -->
+    <div id="result" class="hidden">
+      <h1>You're all set — here's your coupon</h1>
+      <p class="sub">Show this code to the bartender when you arrive.</p>
+      <div id="qr"></div>
+      <div class="code" id="code"></div>
+      <p class="hint">Keep this screen open until you reach Makana.<br>The bartender will scan it to apply your coupon.</p>
+    </div>
+
+    <div class="addr">Makana Kava · 12009 NW 7th Ave, North Miami, FL 33168</div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  // ── CONFIG ──────────────────────────────────────────────
+  var EXEC = 'https://script.google.com/macros/s/AKfycbxjT8-vnckzDfskKJ6PKYwYP-mqZP6pMFM-Pr8DRrt6DBbFLL7ugJEUpk-fV33UGADgFg/exec';
+  var OFFER = 'freekava';
+  var CONV_ID = 'AW-16605899813';
+  var CONV_LABEL = 'zyH3CJbK9sQcEKXYp-49';
+  // ────────────────────────────────────────────────────────
+
+  function qparam(name){
+    var m = new RegExp('[?&]' + name + '=([^&]*)').exec(location.search);
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+
+  // JSONP: evita CORS al llamar Apps Script
+  function jsonp(url){
+    return new Promise(function(resolve, reject){
+      var cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+      var s = document.createElement('script');
+      var timer = setTimeout(function(){ cleanup(); reject(); }, 12000);
+      function cleanup(){ clearTimeout(timer); delete window[cb]; if (s.parentNode) s.parentNode.removeChild(s); }
+      window[cb] = function(data){ cleanup(); resolve(data); };
+      s.onerror = function(){ cleanup(); reject(); };
+      s.src = url + '&callback=' + cb;
+      document.body.appendChild(s);
+    });
+  }
+
+  function claim(){
+    var btn = document.getElementById('btn');
+    btn.disabled = true; btn.textContent = 'Generating...';
+    var gclid = qparam('gclid');
+    var url = EXEC + '?action=claim&offer=' + encodeURIComponent(OFFER) + '&gclid=' + encodeURIComponent(gclid);
+    jsonp(url).then(function(res){
+      if (res && res.ok){ showCoupon(res.code); }
+      else { reset(btn); }
+    }).catch(function(){ reset(btn); });
+  }
+
+  function reset(btn){ btn.disabled=false; btn.textContent='Get my coupon'; alert('Please try again.'); }
+
+  function showCoupon(code){
+    document.getElementById('claim').classList.add('hidden');
+    document.getElementById('result').classList.remove('hidden');
+    document.getElementById('code').textContent = code;
+    new QRCode(document.getElementById('qr'), { text: code, width: 200, height: 200,
+      colorDark:'#1d130c', colorLight:'#ffffff' });
+    // Conversión de Google Ads
+    if (typeof gtag === 'function') {
+      gtag('event', 'conversion', { 'send_to': CONV_ID + '/' + CONV_LABEL });
+    }
+  }
+</script>
+</body>
+</html>
