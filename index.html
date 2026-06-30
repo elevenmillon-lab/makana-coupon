@@ -12,6 +12,22 @@
   gtag('js', new Date());
   gtag('config', 'AW-16605899813');
 </script>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '956357864103839');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=956357864103839&ev=PageView&noscript=1"/></noscript>
+<!-- End Meta Pixel Code -->
 <style>
   :root{ --bg:#1d130c; --card:#2a1c12; --accent:#c98a3c; --accent2:#e7b56a; --text:#f3e9dc; --muted:#b69b80; }
   *{box-sizing:border-box;}
@@ -70,9 +86,8 @@
   var CONV_LABEL = 'zyH3CJbK9sQcEKXYp-49';
 
   // ── Meta (Facebook/Instagram) ───────────────────────────
-  // TODO (Makana Meta Ads): pegar aquí el Meta Pixel ID e instalar fbq en el <head>.
-  // Cuando esté, disparar el evento en showCoupon() para el source 'meta'.
-  var META_PIXEL_ID = '';            // p.ej. '1234567890'
+  // Pixel instalado en el <head>. Evento de reclamo disparado en fireConversion('meta').
+  var META_PIXEL_ID = '956357864103839';
   var META_EVENT    = 'Lead';        // evento estándar a registrar al reclamar
   // ────────────────────────────────────────────────────────
 
@@ -132,7 +147,7 @@
   // Dispara la conversión del canal correcto.
   function fireConversion(source){
     if (source === 'meta'){
-      // TODO (Makana Meta Ads): if (typeof fbq === 'function') fbq('track', META_EVENT);
+      if (typeof fbq === 'function') fbq('track', META_EVENT); // 'Lead'
       return;
     }
     // Google Ads (default)
