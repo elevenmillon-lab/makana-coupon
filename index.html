@@ -54,6 +54,7 @@
       <p class="sub">Show this code to the bartender when you arrive.</p>
       <div id="qr"></div>
       <div class="code" id="code"></div>
+      <p class="hint" id="expires"></p>
       <p class="hint">Keep this screen open until you reach Makana.<br>The bartender will scan it to apply your coupon.</p>
     </div>
 
@@ -67,11 +68,25 @@
   var OFFER = 'freekava';
   var CONV_ID = 'AW-16605899813';
   var CONV_LABEL = 'zyH3CJbK9sQcEKXYp-49';
+
+  // ── Meta (Facebook/Instagram) ───────────────────────────
+  // TODO (Makana Meta Ads): pegar aquí el Meta Pixel ID e instalar fbq en el <head>.
+  // Cuando esté, disparar el evento en showCoupon() para el source 'meta'.
+  var META_PIXEL_ID = '';            // p.ej. '1234567890'
+  var META_EVENT    = 'Lead';        // evento estándar a registrar al reclamar
   // ────────────────────────────────────────────────────────
 
   function qparam(name){
     var m = new RegExp('[?&]' + name + '=([^&]*)').exec(location.search);
     return m ? decodeURIComponent(m[1]) : '';
+  }
+
+  // Detecta canal y click id: gclid → google, fbclid → meta. ?source= manda.
+  function detectChannel(){
+    var gclid = qparam('gclid'), fbclid = qparam('fbclid');
+    var source = (qparam('source') || (fbclid ? 'meta' : 'google')).toLowerCase();
+    var clickid = qparam('clickid') || gclid || fbclid || '';
+    return { source: source, clickid: clickid };
   }
 
   // JSONP: evita CORS al llamar Apps Script
@@ -91,26 +106,53 @@
   function claim(){
     var btn = document.getElementById('btn');
     btn.disabled = true; btn.textContent = 'Generating...';
-    var gclid = qparam('gclid');
-    var url = EXEC + '?action=claim&offer=' + encodeURIComponent(OFFER) + '&gclid=' + encodeURIComponent(gclid);
+    var ch = detectChannel();
+    var url = EXEC + '?action=claim'
+            + '&offer=' + encodeURIComponent(OFFER)
+            + '&clickid=' + encodeURIComponent(ch.clickid)
+            + '&source=' + encodeURIComponent(ch.source);
     jsonp(url).then(function(res){
-      if (res && res.ok){ showCoupon(res.code); }
+      if (res && res.ok){ showCoupon(res); }
       else { reset(btn); }
     }).catch(function(){ reset(btn); });
   }
 
   function reset(btn){ btn.disabled=false; btn.textContent='Get my coupon'; alert('Please try again.'); }
 
-  function showCoupon(code){
+  function showCoupon(res){
     document.getElementById('claim').classList.add('hidden');
     document.getElementById('result').classList.remove('hidden');
-    document.getElementById('code').textContent = code;
-    new QRCode(document.getElementById('qr'), { text: code, width: 200, height: 200,
+    document.getElementById('code').textContent = res.code;
+    new QRCode(document.getElementById('qr'), { text: res.code, width: 200, height: 200,
       colorDark:'#1d130c', colorLight:'#ffffff' });
-    // Conversión de Google Ads
+    startExpiry(res.expira_ts);
+    fireConversion(res.source);
+  }
+
+  // Dispara la conversión del canal correcto.
+  function fireConversion(source){
+    if (source === 'meta'){
+      // TODO (Makana Meta Ads): if (typeof fbq === 'function') fbq('track', META_EVENT);
+      return;
+    }
+    // Google Ads (default)
     if (typeof gtag === 'function') {
       gtag('event', 'conversion', { 'send_to': CONV_ID + '/' + CONV_LABEL });
     }
+  }
+
+  // Cuenta regresiva de validez. Si la oferta no expira (expira_ts vacío), no muestra nada.
+  function startExpiry(iso){
+    var el = document.getElementById('expires');
+    if (!iso){ el.textContent = ''; return; }
+    var end = new Date(iso).getTime();
+    (function tick(){
+      var ms = end - Date.now();
+      if (ms <= 0){ el.innerHTML = '<strong>This coupon has expired.</strong>'; return; }
+      var h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
+      el.innerHTML = '⏳ Expires in <strong>' + h + 'h ' + m + 'm</strong> — redeem before then.';
+      setTimeout(tick, 30000);
+    })();
   }
 </script>
 </body>
