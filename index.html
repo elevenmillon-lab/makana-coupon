@@ -57,11 +57,11 @@ src="https://www.facebook.com/tr?id=956357864103839&ev=PageView&noscript=1"/></n
 
     <!-- State 1: offer -->
     <div id="claim">
-      <h1>Your first kava is on us 🥥</h1>
+      <h1>Your first drink is on us 🍹</h1>
       <p class="sub">Claim your coupon and show it at the bar.</p>
-      <div class="offer">Free kava on your first visit</div>
-      <button id="btn" onclick="claim()">Get my coupon</button>
-      <p class="hint">Valid for first-time visits only. One coupon per person.</p>
+      <div class="offer">Free welcome drink on your first visit</div>
+      <button id="btn" onclick="claim()">Get my free drink</button>
+      <p class="hint">Your welcome drink is a fresh kava or mocktail. First-time visits only, one per person.</p>
     </div>
 
     <!-- State 2: coupon generated -->
@@ -132,7 +132,7 @@ src="https://www.facebook.com/tr?id=956357864103839&ev=PageView&noscript=1"/></n
     }).catch(function(){ reset(btn); });
   }
 
-  function reset(btn){ btn.disabled=false; btn.textContent='Get my coupon'; alert('Please try again.'); }
+  function reset(btn){ btn.disabled=false; btn.textContent='Get my free drink'; alert('Please try again.'); }
 
   function showCoupon(res){
     document.getElementById('claim').classList.add('hidden');
