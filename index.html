@@ -81,10 +81,10 @@
     return m ? decodeURIComponent(m[1]) : '';
   }
 
-  // Detecta canal y click id: gclid → google, fbclid → meta. ?source= manda.
+  // Detecta canal y click id: gclid → google, fbclid → meta, sin click id → direct. ?source= manda.
   function detectChannel(){
     var gclid = qparam('gclid'), fbclid = qparam('fbclid');
-    var source = (qparam('source') || (fbclid ? 'meta' : 'google')).toLowerCase();
+    var source = (qparam('source') || (fbclid ? 'meta' : (gclid ? 'google' : 'direct'))).toLowerCase();
     var clickid = qparam('clickid') || gclid || fbclid || '';
     return { source: source, clickid: clickid };
   }
